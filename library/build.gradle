@@ -1,0 +1,19 @@
+plugins {
+    id 'com.github.deputation.robotspace.java-library-conventions'
+}
+
+repositories {
+    mavenCentral()
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+dependencies {
+    implementation project(path: ':utilities')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+}

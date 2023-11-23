@@ -1,0 +1,100 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{fancyvrb}
+\usepackage{enumitem}  % Include this line in the preamble
+
+\geometry{
+    top=1cm,
+    bottom=1.5cm,
+    left=1.5cm,
+    right=1.5cm
+}
+
+\title{robotSpace: Una libreria Java con applicazione terminale per la simulazione di uno sciame di robot}
+\author{ Redacted }
+\date{27 Giugno 2023}
+
+\begin{document}
+
+    \maketitle
+
+    \section{Introduzione}
+    Il progetto robotSpace si prefigge di realizzare una libreria Java con applicazione terminale per la simulazione di uno sciame di robot. I robot operano in un ambiente bidimensionale di dimensioni illimitate, dove possono muoversi liberamente.
+
+    \section{Dettagli Tecnici}
+    Il progetto è sviluppato in Java 19 con l'utilizzo del sistema di gestione dei progetti Gradle, assicurando una struttura del codice pulita e facilmente estendibile, i vari test sono inclusi nel progetto. Il progetto richiede pertanto un'installazione funzionante della JDK di Java 19 nel sistema in cui viene eseguito.
+
+    \section{Responsabilità assegnate}
+    \begin{itemize}
+        \item La classe App interagisce con RobotSpaceService, e, dopo aver analizzato ed elaborato i parametri in riga di comando passati a ``gradle run`` si occupa di inizializzare correttamente lo stato di quest'ultimo.
+        \item RobotSpaceService gestisce la simulazione dell'ambiente. È responsabile per l'inizializzazione e la gestione di parser, programma, ambiente e controller dei Robot.
+        \item RobotController rappresenta un contenitore che contiene tutti i robot e permette alla classe RobotSpaceService di interagire con tutti i Robot allo stesso momento. È responsabile dell'orchestrazione di tutti i Robot, della loro programmazione, dell'input dei dati ambientali presso i Robot.
+        \item RobotProgram rappresenta un "compilatore" rudimentale che trasforma il programma da testo a istanze di varie classi rappresentanti tutte le varie istruzioni (rappresentazione intermedia) organizzate in maniera da renderne l'esecuzione molto più semplice. È stato scritto per essere facilmente espandibile. RobotSpaceService ne fa uso per "compilare" il programma. Utilizza una classe di aiuto ParsingBodyStack per implementare il parsing corretto di loop annidati.
+        \item Entity è la classe base di Robot, e si occupa di gestire posizione, rotazione, velocità e altri fattori di movimento, astrae tutta la fisica e matematica necessaria per il movimento, in maniera che l'implementazione del Robot risulti più semplice.
+        \item Robot rappresenta un singolo robot all'interno della simulazione, ed è basato sulla classe Entity. È responsabile della manutenzione del suo stato attuale e dello stato del suo processore, che viene astratto tramite l'utilizzo di un'interfaccia RobotContext i cui metodi servono a controllare l'entità Robot. Utilizza una classe di aiuto LoopBodyStack per implementare l'esecuzione di corpi annidati di loop e per tenere traccia dei vari instruction pointer all'interno dei suddetti corpi.
+        \item Rectangle e Circle sono classi che implementano l'interfaccia Shape, e sono utilizzate per astrarre i diversi comportamenti a livello matematico che il codice ha per effettuare il calcolo delle aree. Implementano diverse funzioni per ottenere posizioni casuali all'interno delle figure e per controllare dove si trovano punti arbitrari in relazione alla figura stessa. Queste classi sono pertanto responsabili per l'orientamento ambientale dei Robot.
+    \end{itemize}
+
+    \section{Istruzioni}
+    Per effettuare una compilazione del programma è sufficiente eseguire ``gradle build`` nella cartella principale in cui si trova (la JDK di Java 19 deve essere installata). Per eseguire il programma basta eseguire ``gradle run``. I vari parametri che il programma si aspetta saranno stampati a schermo se non vengono inseriti correttamente. Lo stato dei vari Robot all'interno dell'ambiente verrá stampato nel terminale ad ogni tick di processore.
+
+    \begin{description}[leftmargin=2em]
+        \item[Comando di esempio:]
+    \end{description}
+    \begin{Verbatim}
+    gradle run --args="
+    2
+    string
+    'Z2 CIRCLE 5 6 5\nZ1 RECTANGLE 1 1 2 2'
+    string
+    'SIGNAL Z2\nSIGNAL Z1\nMOVE 1 0 1\nUNSIGNAL Z1\nCONTINUE 5\nMOVE -1 -1 2\nCONTINUE 7'
+    1000
+    1000"
+    \end{Verbatim}
+
+    \begin{description}[leftmargin=2em]
+        \item[Istruzioni di esecuzione e formattazione degli argomenti del programma:]
+    \end{description}
+    \begin{Verbatim}
+    gradle run --args="<numRobots> <envType> <env> <progType> <prog> <tpi> <stpi>"
+
+    Arguments:
+    numRobots: Number of robots to simulate. Robots will be placed randomly in the
+    grid according to the environment defined. If no environment is defined, all
+    the robots will start at a random position, with x and y both being between
+    (-10, 10).
+
+    envType: Type of environment, string or file.
+
+    env: If the type was file, an absolute path to the file containing it.
+    Otherwise a string, use \n to separate new lines.
+
+    progType: Type of program, string or file.
+
+    prog: If the type was file, an absolute path to the file containing the program.
+    Otherwise a string, use \n to separate new lines.
+
+    tpi: Time per instruction (ms), how much time the program should sleep before
+    executing the next instruction, can be 0, it will influence how the CONTINUE
+    instruction works. Should be 1000ms by default.
+
+    stpi: Simulation time per instruction (ms), how much time should pass in the
+    simulation for every instruction executed.
+    \end{Verbatim}
+
+    \begin{description}[leftmargin=2em]
+        \item[Test JUnit:]
+    \end{description}
+
+    I test JUnit coprono oltre l'80\% del codice e il 100\% delle classi principali, rendendo semplice l'estensibilità e il mantenimento del progetto, assicurando un elevato grado di affidabilità del software. I test possono essere eseguiti utilizzando il comando seguente:
+
+    \begin{Verbatim}
+    gradle test
+    \end{Verbatim}
+
+    \section{Conclusione}
+    Il progetto robotSpace è una sfida che pone l'accento su concetti chiave della programmazione orientata agli oggetti e la gestione dei progetti, creando una simulazione interessante e dinamica di uno sciame di Robot.
+
+\end{document}
